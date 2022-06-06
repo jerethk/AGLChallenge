@@ -1,15 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AGLChallenge
 {
     class Program
     {
+        private static HttpClient client = new HttpClient();
+
         static void Main(string[] args)
         {
-            string JsonString = GetJsonString("people.json");
+            Console.WriteLine("Fetching data... (press any key to exit)\n");
+            RunApplication();
+            Console.ReadKey();
+        }
+
+        static async void RunApplication()
+        {
+            const string uri = "http://agl-developer-test.azurewebsites.net/people.json";
+            string JsonString = await GetJsonString(uri);
 
             if (JsonString == null)
             {
@@ -41,24 +53,21 @@ namespace AGLChallenge
             }
         }
 
-        static private string GetJsonString(string path)
+        static async private Task<string> GetJsonString(string uri)
         {
-            string input;
-            
-            using (StreamReader JsonReader = new StreamReader(path))
+            string s;
+
+            try
             {
-                try
-                {
-                    input = JsonReader.ReadToEnd();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    input = null;
-                }
+                s = await client.GetStringAsync(uri);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                s = null;
             }
 
-            return input;
+            return s;
         }
 
         static private List<Owner> ConvertJsonToList(string JsonString)
