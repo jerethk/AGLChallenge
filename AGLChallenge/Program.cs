@@ -36,8 +36,33 @@ namespace AGLChallenge
                     foreach (JsonElement element in document.RootElement.EnumerateArray())
                     {
                         string name = element.GetProperty("name").GetString();
+                        string gender = element.GetProperty("gender").GetString();
+                        int age = element.GetProperty("age").GetInt32();
+                        List<Pet> pets = new List<Pet>();
 
-                        Console.WriteLine(name);
+                        JsonElement petsElement = element.GetProperty("pets");
+                        if (petsElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (JsonElement petElement in petsElement.EnumerateArray())
+                            {
+                                string petName = petElement.GetProperty("name").GetString();
+                                string petType = petElement.GetProperty("type").GetString();
+
+                                pets.Add(new Pet(petName, petType));
+                            }
+                        }
+
+                        ownerList.Add(new Owner(name, gender, age, pets));
+                    }
+
+                    foreach (Owner o in ownerList) 
+                    {
+                        Console.WriteLine($"\n{o.Name} {o.Age} {o.Gender}");
+                        
+                        foreach (Pet p in o.Pets)
+                        {
+                            Console.WriteLine($"     {p.Name} {p.Type}");
+                        }
                     }
                 }
                 catch (JsonException e)
@@ -47,8 +72,7 @@ namespace AGLChallenge
 
             }
 
-            Console.WriteLine("Done");
-
+            Console.WriteLine("\nDone");
         }
     }
 }
