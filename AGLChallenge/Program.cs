@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AGLChallenge
@@ -10,17 +9,18 @@ namespace AGLChallenge
     class Program
     {
         private static HttpClient client = new HttpClient();
+        private const string uri = "http://agl-developer-test.azurewebsites.net/people.json";
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Fetching data... (press any key to exit)\n");
+            Console.WriteLine("Fetching data from web... (press any key to exit)\n");
             RunApplication();
             Console.ReadKey();
         }
 
         static async void RunApplication()
         {
-            const string uri = "http://agl-developer-test.azurewebsites.net/people.json";
+            // Obtain the JSON from the web service
             string JsonString = await GetJsonString(uri);
 
             if (JsonString == null)
@@ -29,6 +29,7 @@ namespace AGLChallenge
             }
             else
             {
+                // Parse the JSON string and convert the data into a List of Owners
                 List<Owner> ownerList = ConvertJsonToList(JsonString);
 
                 if (ownerList == null)
@@ -40,6 +41,7 @@ namespace AGLChallenge
                     OutputCatsByOwnerGender(ownerList);
 
                     /*
+                    // Display all data, for testing
                     foreach (Owner o in ownerList)
                     {
                         Console.WriteLine($"\n{o.Name} {o.Age} {o.Gender}");
@@ -53,23 +55,25 @@ namespace AGLChallenge
             }
         }
 
+        // Gets JSON from the web service, and returns it as a string. Returns null if fails.
         static async private Task<string> GetJsonString(string uri)
         {
-            string s;
+            string result;
 
             try
             {
-                s = await client.GetStringAsync(uri);
+                result = await client.GetStringAsync(uri);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                s = null;
+                Console.WriteLine($"Exception: {e.Message}");
+                result = null;
             }
 
-            return s;
+            return result;
         }
 
+        // Parses the JSON string and returns a List of Owners. Returns null if fails.
         static private List<Owner> ConvertJsonToList(string JsonString)
         {
             List<Owner> ownerList = new List<Owner>();
@@ -80,11 +84,13 @@ namespace AGLChallenge
 
                 foreach (JsonElement element in document.RootElement.EnumerateArray())
                 {
+                    // Retrieve the owner's name, gender and age properties
                     string name = element.GetProperty("name").GetString();
                     string gender = element.GetProperty("gender").GetString();
                     int age = element.GetProperty("age").GetInt32();
-                    List<Pet> pets = new List<Pet>();
 
+                    // Create a list of pets, retrieve the pet data
+                    List<Pet> pets = new List<Pet>();
                     JsonElement petsElement = element.GetProperty("pets");
                     if (petsElement.ValueKind == JsonValueKind.Array)
                     {
@@ -97,6 +103,7 @@ namespace AGLChallenge
                         }
                     }
 
+                    // Add the owner to the list
                     ownerList.Add(new Owner(name, gender, age, pets));
                 }
 
@@ -104,11 +111,12 @@ namespace AGLChallenge
             }
             catch (JsonException e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine($"Exception: {e.Message}");
                 return null;
             }
         }
 
+        // Creates a list of cats owned by each gender of owner, sorts them alphabetically, then prints to console
         static private void OutputCatsByOwnerGender(List<Owner> ownerList)
         {
             List<string> catsOwnedByMales = new List<string>();
@@ -138,9 +146,11 @@ namespace AGLChallenge
                 }
             }
 
+            // Sort lists
             catsOwnedByMales.Sort();
             catsOwnedByFemales.Sort();
 
+            // Print to console
             Console.WriteLine("LIST OF CATS, GROUPED BY GENDER OF OWNER");
             Console.WriteLine("Male owners:");
             foreach (string name in catsOwnedByMales) Console.WriteLine($"· {name}");
