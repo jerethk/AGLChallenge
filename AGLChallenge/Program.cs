@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AGLChallenge
 {
-    class Program
+    public class Program
     {
         private static HttpClient client = new HttpClient();
         private const string uri = "http://agl-developer-test.azurewebsites.net/people.json";
@@ -56,7 +56,7 @@ namespace AGLChallenge
         }
 
         // Gets JSON from the web service, and returns it as a string. Returns null if fails.
-        static async private Task<string> GetJsonString(string uri)
+        static async public Task<string> GetJsonString(string uri)
         {
             string result;
 
@@ -74,7 +74,7 @@ namespace AGLChallenge
         }
 
         // Parses the JSON string and returns a List of Owners. Returns null if fails.
-        static private List<Owner> ConvertJsonToList(string JsonString)
+        static public List<Owner> ConvertJsonToList(string JsonString)
         {
             List<Owner> ownerList = new List<Owner>();
             
@@ -117,7 +117,7 @@ namespace AGLChallenge
         }
 
         // Creates a list of cats owned by each gender of owner, sorts them alphabetically, then prints to console
-        static private void OutputCatsByOwnerGender(List<Owner> ownerList)
+        static public void OutputCatsByOwnerGender(List<Owner> ownerList)
         {
             List<string> catsOwnedByMales = new List<string>();
             List<string> catsOwnedByFemales = new List<string>();
