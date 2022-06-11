@@ -7,7 +7,7 @@ namespace AGLChallenge
     public class Owner
     {
         /// <summary>
-        /// This class represents the owners of pets
+        /// This class represents the owners of pets.
         /// </summary>
         public string Name { get; set; }
         public string Gender { get; set; }

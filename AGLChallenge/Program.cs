@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AGLChallenge
@@ -9,28 +10,37 @@ namespace AGLChallenge
     public class Program
     {
         private static HttpClient client = new HttpClient();
-        private const string uri = "http://agl-developer-test.azurewebsites.net/people.json";
+        private static bool isTimedOut;
+        private const string Uri = "http://agl-developer-test.azurewebsites.net/people.json";
+        private const int TimeOutInterval = 3000;       // Allow 3 seconds before timing out.
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Fetching data from web... (press any key to exit)\n");
+            Console.WriteLine("Fetching data from web service...\n");
             RunApplication();
-            Console.ReadKey();
+
+            // If the process is successful within the TimeOutInterval (milliseconds), isTimedOut will be set to false so the time out message does not show.
+            isTimedOut = true;
+            Thread.Sleep(TimeOutInterval);
+            if (isTimedOut)
+            {
+                Console.WriteLine("\nTimed out");
+            }
         }
 
         static async void RunApplication()
         {
-            // Obtain the JSON from the web service
-            string JsonString = await GetJsonString(uri);
+            // Obtain the JSON from the web service.
+            string jsonString = await GetJsonString(Uri);
 
-            if (JsonString == null)
+            if (jsonString == null)
             {
                 Console.WriteLine("Failed to get JSON");
             }
             else
             {
-                // Parse the JSON string and convert the data into a List of Owners
-                List<Owner> ownerList = ConvertJsonToList(JsonString);
+                // Parse the JSON string and convert the data into a List of Owners.
+                List<Owner> ownerList = ConvertJsonToList(jsonString);
 
                 if (ownerList == null)
                 {
@@ -39,6 +49,7 @@ namespace AGLChallenge
                 else
                 {
                     OutputCatsByOwnerGender(ownerList);
+                    isTimedOut = false;
 
                     /*
                     // Display all data, for testing
@@ -64,6 +75,11 @@ namespace AGLChallenge
             {
                 result = await client.GetStringAsync(uri);
             }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Http Request Exception: {e.Message}");
+                result = null;
+            }
             catch (Exception e)
             {
                 Console.WriteLine($"Exception: {e.Message}");
@@ -74,13 +90,13 @@ namespace AGLChallenge
         }
 
         // Parses the JSON string and returns a List of Owners. Returns null if fails.
-        static public List<Owner> ConvertJsonToList(string JsonString)
+        static public List<Owner> ConvertJsonToList(string jsonString)
         {
             List<Owner> ownerList = new List<Owner>();
             
             try
             {
-                JsonDocument document = JsonDocument.Parse(JsonString);
+                JsonDocument document = JsonDocument.Parse(jsonString);
 
                 foreach (JsonElement element in document.RootElement.EnumerateArray())
                 {
@@ -111,6 +127,11 @@ namespace AGLChallenge
             }
             catch (JsonException e)
             {
+                Console.WriteLine($"Json Exception: {e.Message}");
+                return null;
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine($"Exception: {e.Message}");
                 return null;
             }
@@ -124,25 +145,29 @@ namespace AGLChallenge
 
             foreach (Owner owner in ownerList)
             {
-                if (owner.Gender == "Male")
+                switch (owner.Gender)
                 {
-                    foreach (Pet pet in owner.Pets)
-                    {
-                        if (pet.Type == "Cat")
+                    case "Male":
+                        foreach (Pet pet in owner.Pets)
                         {
-                            catsOwnedByMales.Add(pet.Name);
+                            if (pet.Type == "Cat")
+                            {
+                                catsOwnedByMales.Add(pet.Name);
+                            }
                         }
-                    }
-                }
-                else if (owner.Gender == "Female")
-                {
-                    foreach (Pet pet in owner.Pets)
-                    {
-                        if (pet.Type == "Cat")
+
+                        break;
+
+                    case "Female":
+                        foreach (Pet pet in owner.Pets)
                         {
-                            catsOwnedByFemales.Add(pet.Name);
+                            if (pet.Type == "Cat")
+                            {
+                                catsOwnedByFemales.Add(pet.Name);
+                            }
                         }
-                    }
+
+                        break;
                 }
             }
 
