@@ -117,7 +117,7 @@ namespace AGLChallenge
         }
 
         // Creates a list of cats owned by each gender of owner, sorts them alphabetically, then prints to console
-        static public void OutputCatsByOwnerGender(List<Owner> ownerList)
+        static private void OutputCatsByOwnerGender(List<Owner> ownerList)
         {
             List<string> catsOwnedByMales = new List<string>();
             List<string> catsOwnedByFemales = new List<string>();
