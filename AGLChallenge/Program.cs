@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AGLChallenge
@@ -10,32 +9,53 @@ namespace AGLChallenge
     public class Program
     {
         private static HttpClient client = new HttpClient();
-        private static bool isTimedOut;
+        private static bool isFinished = false;
         private const string Uri = "http://agl-developer-test.azurewebsites.net/people.json";
-        private const int TimeOutInterval = 3000;       // Allow 3 seconds before timing out.
+        private const int TimeOutInterval = 5000;       // Allow 5 seconds before timing out.
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Fetching data from web service...\n");
-            RunApplication();
+            Console.WriteLine($"Fetching data from web service. Process will time out in {TimeOutInterval} ms.\n");
 
-            // If the process is successful within the TimeOutInterval (milliseconds), isTimedOut will be set to false so the time out message does not show.
-            isTimedOut = true;
-            Thread.Sleep(TimeOutInterval);
+            // Note- This is an async method so will run on a separate thread.
+            RunApplicationAsync();       
+
+            // Code for timer.
+            DateTime startTime = DateTime.Now;
+            double timeInterval = 0;
+            bool isTimedOut = false;
+
+            // This loop will exit either when isFinished == true or the process times out
+            while (!isFinished)
+            {
+                timeInterval = (DateTime.Now - startTime).TotalMilliseconds;
+
+                if (timeInterval > TimeOutInterval)
+                {
+                    isTimedOut = true;
+                    break;
+                }
+            }
+
             if (isTimedOut)
             {
                 Console.WriteLine("\nTimed out");
             }
+            else
+            {
+                Console.WriteLine($"\nProcess finished in {Math.Floor(timeInterval)} ms.");
+            }
         }
 
-        static async void RunApplication()
+        static async void RunApplicationAsync()
         {
             // Obtain the JSON from the web service.
-            string jsonString = await GetJsonString(Uri);
+            string jsonString = await GetJsonStringAsync(Uri);
 
             if (jsonString == null)
             {
                 Console.WriteLine("Failed to get JSON");
+                isFinished = true;
             }
             else
             {
@@ -45,14 +65,15 @@ namespace AGLChallenge
                 if (ownerList == null)
                 {
                     Console.WriteLine("Failed to parse JSON");
+                    isFinished = true;
                 }
                 else
                 {
                     OutputCatsByOwnerGender(ownerList);
-                    isTimedOut = false;
+                    isFinished = true;
 
                     /*
-                    // Display all data, for testing
+                    // Display all data in list, only for testing
                     foreach (Owner o in ownerList)
                     {
                         Console.WriteLine($"\n{o.Name} {o.Age} {o.Gender}");
@@ -67,7 +88,7 @@ namespace AGLChallenge
         }
 
         // Gets JSON from the web service, and returns it as a string. Returns null if fails.
-        static async public Task<string> GetJsonString(string uri)
+        static async public Task<string> GetJsonStringAsync(string uri)
         {
             string result;
 

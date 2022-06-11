@@ -12,7 +12,7 @@ namespace UnitTestProject1
         public async Task GetStringFromBadUri()
         {
             // pass bad URI into the method; should result in a 404 and therefore null string
-            var result = await Program.GetJsonString("http://agl-developer-test.azurewebsites.net/hello.json");
+            var result = await Program.GetJsonStringAsync("http://agl-developer-test.azurewebsites.net/hello.json");
 
             Assert.AreEqual(null, result);
         }
@@ -21,7 +21,7 @@ namespace UnitTestProject1
         public async Task GetStringFromGoodUri()
         {
             // pass correct URI into the method; should return a non-null string
-            var result = await Program.GetJsonString("http://agl-developer-test.azurewebsites.net/people.json");
+            var result = await Program.GetJsonStringAsync("http://agl-developer-test.azurewebsites.net/people.json");
 
             Assert.AreNotEqual(null, result);
         }
