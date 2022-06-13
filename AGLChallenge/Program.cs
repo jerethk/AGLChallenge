@@ -8,7 +8,7 @@ namespace AGLChallenge
 {
     public class Program
     {
-        private static HttpClient client = new HttpClient();
+        private static HttpClient _client = new HttpClient();
         private static bool isFinished = false;
         private const string Uri = "http://agl-developer-test.azurewebsites.net/people.json";
         private const int TimeOutInterval = 5000;       // Allow 5 seconds before timing out.
@@ -94,7 +94,7 @@ namespace AGLChallenge
 
             try
             {
-                result = await client.GetStringAsync(uri);
+                result = await _client.GetStringAsync(uri);
             }
             catch (HttpRequestException e)
             {
