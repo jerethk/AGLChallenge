@@ -199,10 +199,24 @@ namespace AGLChallenge
             // Print to console
             Console.WriteLine("LIST OF CATS, GROUPED BY GENDER OF OWNER");
             Console.WriteLine("Male owners:");
-            foreach (string name in catsOwnedByMales) Console.WriteLine($"· {name}");
+            if (catsOwnedByMales.Count == 0)
+            {
+                Console.WriteLine("Nil");
+            }
+            else
+            {
+                foreach (string name in catsOwnedByMales) Console.WriteLine($"· {name}");
+            }
 
             Console.WriteLine("\nFemale owners:");
-            foreach (string name in catsOwnedByFemales) Console.WriteLine($"· {name}");
+            if (catsOwnedByFemales.Count == 0)
+            {
+                Console.WriteLine("Nil");
+            }
+            else
+            {
+                foreach (string name in catsOwnedByFemales) Console.WriteLine($"· {name}");
+            }
         }
     }
 }
